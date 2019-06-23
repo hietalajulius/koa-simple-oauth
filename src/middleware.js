@@ -33,8 +33,7 @@ export default ({
     });
 
     // Define redirect error helper
-    const redirectError = (ctx, reason) =>
-        ctx.redirect(disableErrorReason ? redirectErrorUrl : `${redirectErrorUrl}?error=${reason}`);
+    const redirectError = (ctx, reason) => ctx.redirect(disableErrorReason ? redirectErrorUrl : `${redirectErrorUrl}?error=${reason}`);
 
     // Login endpoint
     const login = async (ctx) => {
@@ -83,14 +82,10 @@ export default ({
             });
             const accessToken = oauth2.accessToken.create(result);
 
-
             // Fetch user details
-            const response = await fetch(
-                `${userUrl}`,
-                {
-                    method: userMethod
-                }
-            );
+            const response = await fetch(`${userUrl}`, {
+                method: userMethod
+            });
             if (response.ok) {
                 // Parse response
                 const data = await response.json();
@@ -121,21 +116,22 @@ export default ({
     };
 
     const refreshToken = async (ctx) => {
-        const tokenObject = oauth2.accessToken.create(ctx.session.token);
-        const refreshToken = await tokenObject.refresh({client_id: clientId, client_secret: clientSecret});
+        const tokenObjectTT = oauth2.accessToken.create(ctx.session.token);
+        const refreshToken = await tokenObjectTT.refresh({client_id: clientId, client_secret: clientSecret});
+        const response = await fetch(`${userUrl}`, {
+            method: userMethod
+        });
+        const data = await response.json();
+        const user = getUser(data);
+        ctx.session.user = user;
         ctx.session.token = refreshToken.token;
-        ctx.session.user = {...ctx.session.user, token_UNSAFE: ctx.session.token.access_token};
     };
 
     // Whoami endpoint
     const whoami = async (ctx) => {
         try {
             // Check if the user is logged in and the token is still valid
-            if (
-                ctx.session.token &&
-                new Date() < new Date(ctx.session.token.expires_at) &&
-                ctx.session.user
-            ) {
+            if (ctx.session.token && new Date() < new Date(ctx.session.token.expires_at) && ctx.session.user) {
                 return onSuccess(ctx, ctx.session.user);
             } else {
                 const err = new Error('Not logged in');
@@ -163,27 +159,16 @@ export default ({
 
     // Is logged in middleware
     const isLoggedIn = async (ctx, next) => {
-        ctx.state.isLoggedIn = () =>
-            ctx.session.token &&
-            new Date() < new Date(ctx.session.token.expires_at) &&
-            ctx.session.user;
+        ctx.state.isLoggedIn = () => ctx.session.token && new Date() < new Date(ctx.session.token.expires_at) && ctx.session.user;
         await next();
     };
 
     // Require login middleware
     const requireLogin = async (ctx, next) => {
         // Check if the user is logged in and the token is still valid
-        if (
-            ctx.session.token &&
-            new Date() < new Date(ctx.session.token.expires_at) &&
-            ctx.session.user
-        ) {
+        if (ctx.session.token && new Date() < new Date(ctx.session.token.expires_at) && ctx.session.user) {
             await next();
-        } else if (
-            ctx.session.token &&
-            new Date() > new Date(ctx.session.token.expires_at) &&
-            ctx.session.user
-        ) {
+        } else if (ctx.session.token && new Date() > new Date(ctx.session.token.expires_at) && ctx.session.user) {
             try {
                 await refreshToken(ctx);
                 await next();
