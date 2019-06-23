@@ -1,5 +1,5 @@
 {
-  "name": "koa-simple-oauth-oura-patch",
+  "name": "koa-simple-oauth",
   "description": "Simple OAuth2 authentication middleware for Koa.",
   "version": "1.1.0",
   "license": "MIT",
