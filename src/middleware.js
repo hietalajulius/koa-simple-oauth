@@ -116,8 +116,8 @@ export default ({
     };
 
     const refreshToken = async (ctx) => {
-        const tokenObjectTT = oauth2.accessToken.create(ctx.session.token);
-        const refreshToken = await tokenObjectTT.refresh({client_id: clientId, client_secret: clientSecret});
+        const tokenObject = oauth2.accessToken.create(ctx.session.token);
+        const refreshToken = await tokenObject.refresh({client_id: clientId, client_secret: clientSecret});
         const response = await fetch(`${userUrl}`, {
             method: userMethod
         });
