@@ -189,7 +189,6 @@ export default ({
         whoami,
         logout,
         isLoggedIn,
-        requireLogin,
-        refreshToken
+        requireLogin
     };
 };
