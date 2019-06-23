@@ -53,8 +53,8 @@ export default ({
             const scopeQuery = ctx.query.scope;
             let scope;
             if (scopeQuery) {
-                const splitScopeQuery = scopeQuery.split("+");
-                scope = splitScopeSquery.length > 1 ? splitScopeQuery : splitScopeQuery[0];
+                const splitScopeQuery = scopeQuery.split('+');
+                scope = splitScopeQuery.length > 1 ? splitScopeQuery : splitScopeQuery[0];
             } else {
                 scope = 'read';
             }
