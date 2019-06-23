@@ -50,19 +50,15 @@ export default ({
             }
 
             // Redirect to OAuth provider
-            const scopeQuery = ctx.query.scope;
-            let scope;
-            if (scopeQuery) {
-                const splitScopeQuery = scopeQuery.split('+');
-                scope = splitScopeQuery.length > 1 ? splitScopeQuery : splitScopeQuery[0];
-            } else {
-                scope = 'read';
-            }
-            const url = oauth2.authorizationCode.authorizeURL({
+            let params = {
                 redirect_uri: redirectUrl,
-                scope,
                 state: state
-            });
+            };
+            const scope = ctx.query.scope ? ctx.query.scope.split('+') : undefined;
+            if (scope) {
+                params = {...params, scope};
+            }
+            const url = oauth2.authorizationCode.authorizeURL(params);
             ctx.redirect(url);
         } catch (err) {
             logError(err);
