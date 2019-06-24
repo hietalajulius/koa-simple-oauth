@@ -169,9 +169,9 @@ export default ({
     // Require login middleware
     const requireLogin = async (ctx, next) => {
         // Check if the user is logged in and the token is still valid
-        if (ctx.session.token && new Date() > new Date(ctx.session.token.expires_at) && ctx.session.user) {
+        if (ctx.session.token && new Date() < new Date(ctx.session.token.expires_at) && ctx.session.user) {
             await next();
-        } else if (ctx.session.token && new Date() < new Date(ctx.session.token.expires_at) && ctx.session.user) {
+        } else if (ctx.session.token && new Date() > new Date(ctx.session.token.expires_at) && ctx.session.user) {
             try {
                 await ctx.state.refreshToken();
                 await next();
