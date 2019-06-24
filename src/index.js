@@ -32,6 +32,7 @@ export default ({
     return {
         login: router.get(login, middleware.login),
         authorized: router.get(authorized, middleware.authorized),
+        refreshToken: middleware.refreshToken,
         whoami: router.get(whoami, middleware.whoami),
         logout: router.get(logout, middleware.logout),
         isLoggedIn: middleware.isLoggedIn,

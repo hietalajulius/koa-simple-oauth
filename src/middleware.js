@@ -115,16 +115,19 @@ export default ({
         }
     };
 
-    const refreshToken = async (ctx) => {
-        const tokenObject = oauth2.accessToken.create(ctx.session.token);
-        const refreshToken = await tokenObject.refresh({client_id: clientId, client_secret: clientSecret});
-        const response = await fetch(`${userUrl}`, {
-            method: userMethod
-        });
-        const data = await response.json();
-        const user = getUser(data);
-        ctx.session.user = user;
-        ctx.session.token = refreshToken.token;
+    const refreshToken = async (ctx, next) => {
+        ctx.state.refreshToken = async () => {
+            const tokenObject = oauth2.accessToken.create(ctx.session.token);
+            const refreshToken = await tokenObject.refresh({client_id: clientId, client_secret: clientSecret});
+            const response = await fetch(`${userUrl}`, {
+                method: userMethod
+            });
+            const data = await response.json();
+            const user = getUser(data);
+            ctx.session.user = user;
+            ctx.session.token = refreshToken.token;
+        };
+        await next();
     };
 
     // Whoami endpoint
@@ -166,11 +169,11 @@ export default ({
     // Require login middleware
     const requireLogin = async (ctx, next) => {
         // Check if the user is logged in and the token is still valid
-        if (ctx.session.token && new Date() < new Date(ctx.session.token.expires_at) && ctx.session.user) {
+        if (ctx.session.token && new Date() > new Date(ctx.session.token.expires_at) && ctx.session.user) {
             await next();
-        } else if (ctx.session.token && new Date() > new Date(ctx.session.token.expires_at) && ctx.session.user) {
+        } else if (ctx.session.token && new Date() < new Date(ctx.session.token.expires_at) && ctx.session.user) {
             try {
-                await refreshToken(ctx);
+                await ctx.state.refreshToken();
                 await next();
             } catch (err) {
                 logError(err);
@@ -189,6 +192,7 @@ export default ({
         whoami,
         logout,
         isLoggedIn,
-        requireLogin
+        requireLogin,
+        refreshToken
     };
 };
